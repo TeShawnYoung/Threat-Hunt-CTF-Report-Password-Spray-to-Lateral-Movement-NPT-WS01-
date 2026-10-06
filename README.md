@@ -133,13 +133,21 @@ DeviceNetworkEvents
 
 **Flag 6: File Events — Dropped Implant**
 
-Searched `DeviceFileEvents` for executables created in staging locations such as Temp, AppData, Downloads and Public. The implant `WindowsUpdate.exe` was created in `C:\Windows\Temp\` with the SHA256 hash `20cef6a013953890f9d38605d25d60dd63b42b09946bbb18ddb4a456da306e77`.
+Searched `DeviceFileEvents` on `npt-ws01` for any file event with `.exe` in its path. The query returned only a small number of results, so they could be reviewed by eye without any further filtering. One entry stood out: `WindowsUpdate.exe` sitting in `C:\Windows\Temp\`. A genuine Windows Update component has no reason to be in a Temp folder, so the file was out of place and was identified as the implant. Its SHA256 hash is `20cef6a013953890f9d38605d25d60dd63b42b09946bbb18ddb4a456da306e77`.
 
 ```kql
-// Paste KQL here
+let start_time = datetime(2026-04-21T00:00:00.00Z);
+let end_time = datetime(2026-04-23T00:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+DeviceFileEvents
+| where TimeGenerated between (start_time .. end_time) 
+| where DeviceName  == HostInQuestion
+| where FolderPath contains ".exe"
+| project Timestamp, DeviceName, ActionType, FolderPath, SHA256
 ```
 
-<!-- SCREENSHOT: paste query results image here -->
+<img width="1207" height="213" alt="image" src="https://github.com/user-attachments/assets/84c929a3-0412-4d63-963f-de0944b46e35" />
+
 
 **Flag 7: Registry Events — Run-Key Persistence**
 
