@@ -50,10 +50,33 @@ let HostInQuestion = "npt-ws01";
 Searched `DeviceLogonEvents` for successful logons on `npt-ws01` and filtered to logons made over the network (LogonType 3). The local account `helpdesk` logged on from the external IP address `20.110.92.50`. This was not Mark's own account, and a local administrator account authenticating from a public address has no legitimate reason to occur on a Finance workstation.
 
 ```kql
-// Paste KQL here
+let start_time = datetime(2026-04-21T00:00:00.00Z);
+let end_time = datetime(2026-04-23T00:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+DeviceLogonEvents
+| where TimeGenerated between (start_time .. end_time) 
+| where DeviceName  == HostInQuestion
+| where ActionType == "LogonSuccess"
+
+let start_time = datetime(2026-04-21T00:00:00.00Z);
+let end_time = datetime(2026-04-23T00:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+DeviceLogonEvents
+| where TimeGenerated between (start_time .. end_time) 
+| where DeviceName  == HostInQuestion
+| where AccountName =="helpdesk"
+| where ActionType == "LogonSuccess"
+| project TimeGenerated, DeviceName, ActionType, AccountName, RemoteIP
 ```
 
-<!-- SCREENSHOT: paste query results image here -->
+<img width="1363" height="192" alt="image" src="https://github.com/user-attachments/assets/466d8487-b1fa-4131-9d1c-1f44bcd1bcd7" />
+
+
+
+<img width="873" height="157" alt="image" src="https://github.com/user-attachments/assets/bf38022d-5138-46e4-ae10-f5903a735744" />
+
+
+
 
 **Flag 3: Process Events — Implant Execution**
 
