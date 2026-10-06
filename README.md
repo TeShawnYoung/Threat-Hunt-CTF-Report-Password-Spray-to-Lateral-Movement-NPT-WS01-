@@ -154,30 +154,55 @@ DeviceFileEvents
 Searched `DeviceRegistryEvents` for writes under `...\CurrentVersion\Run`. The attacker created a value named `WindowsHealthCheck`, disguised as a legitimate health task, with data pointing back to the implant in Temp.
 
 ```kql
-// Paste KQL here
+let start_time = datetime(2026-04-21T00:00:00.00Z);
+let end_time = datetime(2026-04-23T00:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+DeviceRegistryEvents 
+| where TimeGenerated between (start_time .. end_time) 
+| where DeviceName  == HostInQuestion
+| where InitiatingProcessCommandLine contains "run"
+| project TimeGenerated, DeviceName, ActionType, RegistryValueName, InitiatingProcessCommandLine
 ```
 
-<!-- SCREENSHOT: paste query results image here -->
+<img width="1463" height="170" alt="image" src="https://github.com/user-attachments/assets/56810ac8-7e47-4961-9a53-886ab914e5f7" />
+
 
 **Flag 8: Process Events — Scheduled-Task Persistence**
 
 Searched `DeviceProcessEvents` for `schtasks.exe /create`. The `/tn` argument shows a task named `GoogleUpdaterTask`, impersonating a well-known software updater.
 
 ```kql
-// Paste KQL here
+let start_time = datetime(2026-04-21T00:00:00.00Z);
+let end_time = datetime(2026-04-23T00:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+DeviceProcessEvents
+| where TimeGenerated between (start_time .. end_time) 
+| where DeviceName  == HostInQuestion
+|where ProcessCommandLine contains "tn"
+| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessFileName
 ```
 
-<!-- SCREENSHOT: paste query results image here -->
+<img width="1445" height="188" alt="image" src="https://github.com/user-attachments/assets/9df660d8-09f4-4001-a97a-0a814b74dfd7" />
+
 
 **Flag 9: Process Events — Service Persistence**
 
 Searched `DeviceProcessEvents` for `sc.exe create`. The attacker installed a service named `WindowsHealthSvc`, masquerading as a Windows health service, with its `binPath` pointing at the implant.
 
 ```kql
-// Paste KQL here
+let start_time = datetime(2026-04-21T00:00:00.00Z);
+let end_time = datetime(2026-04-23T00:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+DeviceProcessEvents
+| where TimeGenerated between (start_time .. end_time) 
+| where DeviceName  == HostInQuestion
+|where ProcessCommandLine contains "sc.exe create"
+| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine
 ```
 
-<!-- SCREENSHOT: paste query results image here -->
+<img width="1445" height="113" alt="image" src="https://github.com/user-attachments/assets/64f3b38e-4b0e-4ad1-919d-645f48b0aede" />
+
+
 
 **Flag 10: Process Events — Backdoor Account**
 
