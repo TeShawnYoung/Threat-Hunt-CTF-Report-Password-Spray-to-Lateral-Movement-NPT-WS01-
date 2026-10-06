@@ -90,7 +90,7 @@ DeviceProcessEvents
 | where TimeGenerated between (start_time .. end_time) 
 | where DeviceName  == HostInQuestion
 | where AccountName == "helpdesk"
-| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessCommandLine, InitiatingProcessFileName
+| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessCommandLine
 ```
 
 <img width="1530" height="105" alt="image" src="https://github.com/user-attachments/assets/120a0609-36dc-4a3a-acdc-2260457c0017" />
@@ -100,20 +100,36 @@ DeviceProcessEvents
 Pivoted on that `cmd.exe` to see what spawned it. The initiating process was `wmiprvse.exe`, the WMI provider host. This confirms the implant was started through remote WMI execution and not by a user sitting at the machine.
 
 ```kql
-// Paste KQL here
+let start_time = datetime(2026-04-21T00:00:00.00Z);
+let end_time = datetime(2026-04-23T00:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+DeviceProcessEvents
+| where TimeGenerated between (start_time .. end_time) 
+| where DeviceName  == HostInQuestion
+| where AccountName == "helpdesk"
+| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine,InitiatingProcessFileName
 ```
 
-<!-- SCREENSHOT: paste query results image here -->
+<img width="1386" height="123" alt="image" src="https://github.com/user-attachments/assets/1437f886-6547-458d-9497-217b517f517d" />
+
 
 **Flag 5: Network Events — Command and Control**
 
 Searched `DeviceNetworkEvents` for outbound connections on port 443 and removed legitimate Microsoft destinations. One domain was the odd one out: `updates.abordasync.website`. It resolves to `20.110.92.50`, the same address the attacker logged on from.
 
 ```kql
-// Paste KQL here
+let start_time = datetime(2026-04-21T00:00:00.00Z);
+let end_time = datetime(2026-04-23T00:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+DeviceNetworkEvents
+| where TimeGenerated between (start_time .. end_time) 
+| where DeviceName  == HostInQuestion
+| where InitiatingProcessAccountName == "helpdesk"
+| project TimeGenerated, DeviceName, ActionType, RemoteUrl, InitiatingProcessCommandLine, InitiatingProcessFileName
 ```
 
-<!-- SCREENSHOT: paste query results image here -->
+<img width="1423" height="94" alt="image" src="https://github.com/user-attachments/assets/9791d252-b3a5-458b-bd2b-10f89a60e928" />
+
 
 **Flag 6: File Events — Dropped Implant**
 
