@@ -1,5 +1,3 @@
-<img width="400" src="banner.png" alt="Remote Desktop Connection prompt asking to allow m.smith to connect, with a crosshair over it"/>
-
 # Threat Hunt CTF Report: Password Spray to Lateral Movement (NPT-WS01)
 
 ## Platforms and Languages Leveraged
