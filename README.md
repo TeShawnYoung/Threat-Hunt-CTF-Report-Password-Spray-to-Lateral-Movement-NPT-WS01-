@@ -196,7 +196,7 @@ let HostInQuestion = "npt-ws01";
 DeviceProcessEvents
 | where TimeGenerated between (start_time .. end_time) 
 | where DeviceName  == HostInQuestion
-|where ProcessCommandLine contains "sc.exe create"
+| where ProcessCommandLine contains "sc.exe create"
 | project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine
 ```
 
