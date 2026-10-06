@@ -209,20 +209,35 @@ DeviceProcessEvents
 Searched `DeviceProcessEvents` for `net.exe` and `net1.exe` commands using `user` or `localgroup`. Two correlated events seconds apart show the attacker creating the local account `nexus_admin` and then adding it to the Administrators group.
 
 ```kql
-// Paste KQL here
+let start_time = datetime(2026-04-21T00:00:00.00Z);
+let end_time = datetime(2026-04-23T00:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+DeviceProcessEvents
+| where TimeGenerated between (start_time .. end_time) 
+| where DeviceName  == HostInQuestion
+| where ProcessCommandLine contains  "user"
+| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine
 ```
 
-<!-- SCREENSHOT: paste query results image here -->
+<img width="1357" height="221" alt="image" src="https://github.com/user-attachments/assets/99065a04-b415-4ebb-8f82-358ed187cb1b" />
 
 **Flag 11: Alert Evidence and Device Info — Second Host**
 
 Searched `AlertEvidence` for other `npt-` devices that raised alerts and checked onboarding status across the fleet in `DeviceInfo`. One other host, `npt-srv01`, carried a lateral-movement alert: "Azure RunScript used to deploy malicious code". It is an onboarded Windows Server 2022 machine, so containment was extended to it.
 
 ```kql
-// Paste KQL here
+let start_time = datetime(2026-04-21T00:00:00.00Z);
+let end_time = datetime(2026-04-23T00:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+AlertEvidence
+| where Timestamp between (start_time .. end_time)
+| where DeviceName startswith "npt-" and DeviceName != HostInQuestion
+| where Categories has "LateralMovement"
+| project Timestamp, DeviceName, Title, Categories, AttackTechniques
 ```
 
-<!-- SCREENSHOT: paste query results image here -->
+<img width="1176" height="342" alt="image" src="https://github.com/user-attachments/assets/b28c7b7f-fd81-422a-863a-7d80a880a3c7" />
+
 
 **Alert Evidence — Attacker Tooling**
 
