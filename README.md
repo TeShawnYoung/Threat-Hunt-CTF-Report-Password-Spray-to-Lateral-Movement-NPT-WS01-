@@ -83,10 +83,17 @@ DeviceLogonEvents
 Searched `DeviceProcessEvents` for everything that ran under the `helpdesk` account. One command line silently launched a binary out of a Temp folder: `cmd.exe /Q /c start "" "C:\Windows\Temp\WindowsUpdate.exe"`. The quiet `/Q /c` pattern is the fingerprint of wmiexec-style remote execution.
 
 ```kql
-// Paste KQL here
+let start_time = datetime(2026-04-21T00:00:00.00Z);
+let end_time = datetime(2026-04-23T00:00:00.00Z);
+let HostInQuestion = "npt-ws01";
+DeviceProcessEvents
+| where TimeGenerated between (start_time .. end_time) 
+| where DeviceName  == HostInQuestion
+| where AccountName == "helpdesk"
+| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessCommandLine, InitiatingProcessFileName
 ```
 
-<!-- SCREENSHOT: paste query results image here -->
+<img width="1530" height="105" alt="image" src="https://github.com/user-attachments/assets/120a0609-36dc-4a3a-acdc-2260457c0017" />
 
 **Flag 4: Process Events — Parent Process**
 
