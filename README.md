@@ -1,4 +1,5 @@
-<img width="320" src="logo.png" alt="Threat hunt logo: a purple emblem with a user keyhole and network nodes"/>
+<img width="760" height="319" alt="image" src="https://github.com/user-attachments/assets/89493d95-ce6f-43af-9145-7f0eb1679c6e" />
+
 
 # Threat Hunt CTF Report: Password Spray to Lateral Movement (NPT-WS01)
 
