@@ -324,7 +324,7 @@ AlertEvidence
 - Attacker-created account: `nexus_admin` (member of Administrators)
 - Second host in scope: `npt-srv01`
 
-**Event Timeline**
+#### Event Timeline
 
 | Time (UTC) | Event |
 |---|---|
@@ -406,6 +406,26 @@ Response Enhancements:
 - Ask staff to report unexpected login prompts straight away.
 
 ---
+
+## MITRE ATT&CK TTP Alignment
+
+| Technique | Tactic | Reason |
+|---|---|---|
+| T1110.003 — Brute Force: Password Spraying | Credential Access | NetExec ran `nxc rdp` against `npt-ws01` with a list of usernames and a single password, which matches the overnight login prompts the user reported. |
+| T1078.003 — Valid Accounts: Local Accounts | Initial Access | The spray succeeded for the local administrator account `helpdesk`, which then logged on from the external address `20.110.92.50`. |
+| T1021.002 — Remote Services: SMB/Windows Admin Shares | Lateral Movement | The `helpdesk` credentials were used to write to the `C$` administrative share on `npt-ws01` (`nxc smb ... --share C$`). |
+| T1105 — Ingress Tool Transfer | Command and Control | The implant `WindowsUpdate.exe` was copied from the attacker's host into `C:\Windows\Temp\`. |
+| T1047 — Windows Management Instrumentation | Execution | `wmiprvse.exe` spawned the command that started the implant, showing it was launched remotely through WMI and not by a local user. |
+| T1059.003 — Command and Scripting Interpreter: Windows Command Shell | Execution | The implant was started with `cmd.exe /Q /c start "" "C:\Windows\Temp\WindowsUpdate.exe"`. |
+| T1036.005 — Masquerading: Match Legitimate Name or Location | Defense Evasion | The implant was named `WindowsUpdate.exe` and the Run-key value `WindowsHealthCheck` to pass as genuine Windows components. |
+| T1036.004 — Masquerading: Masquerade Task or Service | Defense Evasion | The scheduled task `GoogleUpdaterTask` and the service `WindowsHealthSvc` were named after legitimate software. |
+| T1071.001 — Application Layer Protocol: Web Protocols | Command and Control | A process running under `helpdesk` made outbound connections to the attacker's domain `updates.abordasync.website`. |
+| T1547.001 — Boot or Logon Autostart Execution: Registry Run Keys / Startup Folder | Persistence | A Run-key value named `WindowsHealthCheck` was created so the implant starts automatically. |
+| T1053.005 — Scheduled Task/Job: Scheduled Task | Persistence | `schtasks.exe /create` registered the task `GoogleUpdaterTask` to relaunch the implant. |
+| T1543.003 — Create or Modify System Process: Windows Service | Persistence | `sc.exe create` installed the service `WindowsHealthSvc` with its `binPath` pointing at the implant. |
+| T1136.001 — Create Account: Local Account | Persistence | `net user ... /add` created the backdoor local account `nexus_admin`. |
+| T1098 — Account Manipulation | Persistence / Privilege Escalation | `nexus_admin` was then added to the local Administrators group to give the backdoor full control. |
+| T1021 — Remote Services (to investigate) | Lateral Movement | Defender raised a lateral-movement alert tagged with this technique on `npt-srv01`. The link back to `npt-ws01` is not yet confirmed from logon or network events. |
 
 ## Summary
 
